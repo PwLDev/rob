@@ -16,3 +16,14 @@ Share opinions, laugh together, and level up your server with a bot that can tal
     - `dumb` (values: **enable/disable**) -- Controls whether to generate messages locally instead of using groqcloud's API, which may produce less coherent responses and may not use a full-fat AI model all the time. **This is currently an UNSTABLE feature as it may make the bot faster, slower, or not work at all.** - Default is **disable**
     - `mailChannel` (values: **channel name starting with #**) -- Sets the channel to use for receiving letters from other servers. - Auto-detects your general channel by default.
 4. Send your first message to Rob by @mentioning him!
+
+# Commands
+## Mail:
+- `#!address` - Shows your server's robmail address.
+- `#!trust <address>` (admin) - Trusts another server's address, allowing them to send you letters. Must be run on both your and their server.
+- `#!untrust <address>` (admin) - Stops trusting another server's address, blocking them from sending you letters.
+- `#!phonebook` - Presents all addresses trusted by the current server.
+- `#!send <address> <message>` - Sends a letter to a specified robmail address.
+## Misc:
+- `#!help` - Lists all options that can be modified in your server.
+- `#!about` - Shows bot credits and interaction stats.
