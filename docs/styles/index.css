@@ -25,6 +25,10 @@ hr {
     border: 2px solid #00000066;
 }
 
+a {
+    color: black;
+}
+
 button {
     font-size: 1.1em;
     padding: 8px;
