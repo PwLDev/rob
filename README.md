@@ -26,6 +26,7 @@ Share opinions, laugh together, and level up your server with a bot that can tal
 ## Misc:
 - `#!help` - Lists all options that can be modified in your server.
 - `#!about` - Shows bot credits and interaction stats.
+- `#!dadjoke` - Sends a random joke from the [icanhazadadjoke](https://icanhazdadjoke.com/) API
 
 # Development setup
 1. Install Obun

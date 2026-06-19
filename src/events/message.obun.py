@@ -26,6 +26,7 @@ async def on_message(message):
     #:section src/commands/trustuntrust.obun.py
     #:section src/commands/send.obun.py
     #:section src/commands/phonebook.obun.py
+    #:section src/commands/dadjoke.obun.py
     # ------------------
     
     if not config["listen"]:
