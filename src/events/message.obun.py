@@ -27,6 +27,7 @@ async def on_message(message):
     #:section src/commands/send.obun.py
     #:section src/commands/phonebook.obun.py
     #:section src/commands/dadjoke.obun.py
+    #:section src/commands/owobonk.obun.py
     # ------------------
     
     if not config["listen"]:
@@ -38,23 +39,27 @@ async def on_message(message):
         async with message.channel.typing():
             num_responses = random.choices([1, 2, 3], weights=[75, 20, 5], k=1)[0]
 
-            for _ in range(num_responses):
+            for i in range(num_responses):
                 if random.random() < tin_can_chance:
                     response = "*tin can noises*"
                 else:
                     response = await generate_response(
-                        "respond",
+                        'respond' if i == 0 else 'continue your previous message',
                         history,
                         config.get("model"),
                         config.get("dumb"),
                         f"the {message.guild.name} server" if message.guild else "DMs"
                     )
 
+                if (history and history[-1]["role"] == "assistant" and history[-1]["content"] == response):
+                    continue
+
                 history.append({"role": "assistant", "content": response})
                 await message.channel.send(response)
 
-                if num_responses > 1:
-                    await asyncio.sleep(random.uniform(1, 3))
+                # sleep between responses, not after the last one
+                if i < num_responses - 1:
+                    await asyncio.sleep(random.uniform(0.5, 2))
 
         if message.guild:
             guild_daily_stats[message.guild.id] += num_responses
