@@ -73,6 +73,28 @@ def describe(image_url: str, conf_threshold: float = 0.35) -> str:
         print(e)
         return "An image you can't see"
 
+def ocr(image_url: str) -> str | None:
+    try:
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+
+        with tempfile.NamedTemporaryFile(suffix=".png") as f:
+            f.write(response.content)
+            f.flush()
+            image = Image.open(f.name)
+
+            text = pytesseract.image_to_string(image).strip()
+            text = re.sub(r"\s+", " ", text)
+
+            if text:
+                return text
+
+            return None
+
+    except Exception as e:
+        print(f"OCR error: {e}")
+        return None
+
 def process_msg(message):
     parts = []
     content = message.clean_content.strip()
@@ -86,6 +108,10 @@ def process_msg(message):
         if attachment.content_type and attachment.content_type.startswith("image/"):
             desc = describe(attachment.url)
             info.append(desc)
+
+            textcontent = ocr(attachment.url)
+            if textcontent:
+                info.append(f'Has text which reads: "{textcontent[:500]}"')
 
         parts.append(f"[Attachment: {', '.join(info)}]")
 
