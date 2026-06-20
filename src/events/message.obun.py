@@ -6,7 +6,7 @@ async def on_message(message):
     if message.guild:
         guild_id = message.guild.id
         config = load_config(guild_id)
-        guild_message_histories[guild_id].append({"role": "user", "content": f"{message.author.name} said: {message.content}"})
+        guild_message_histories[guild_id].append({"role": "user", "content": process_msg(message)})
         history = guild_message_histories[guild_id]
         if not message.channel.permissions_for(message.guild.me).send_messages:
             return
@@ -14,7 +14,7 @@ async def on_message(message):
         user_id = message.author.id
         userconfig = "userland"
         config = load_config(userconfig)
-        dm_message_histories[user_id].append({"role": "user", "content": message.content})
+        dm_message_histories[user_id].append({"role": "user", "content": process_msg(message)})
         history = dm_message_histories[user_id]
     
     # --- BOT COMMANDS ---
@@ -44,7 +44,7 @@ async def on_message(message):
                     response = "*tin can noises*"
                 else:
                     response = await generate_response(
-                        'respond' if i == 0 else 'continue your previous message',
+                        'respond' if i == 0 else 'continue Rob\'s previous message',
                         history,
                         config.get("model"),
                         config.get("dumb"),
