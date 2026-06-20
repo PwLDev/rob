@@ -34,6 +34,7 @@ async def on_message(message):
         return
     
     should_respond = message.mention_everyone or client.user.mentioned_in(message) or random.random() < (config["responseFrequency"] / 100)
+    should_reply = client.user.mentioned_in(message) or message.reference is not None
     
     if should_respond:
         async with message.channel.typing():
@@ -41,7 +42,10 @@ async def on_message(message):
 
             for i in range(num_responses):
                 if random.random() < tin_can_chance:
-                    response = "*tin can noises*"
+                    if random.randint(0, 1) == 0:
+                        response = "*tin can noises*"
+                    else:
+                        response = "https://odysea.us.to/assets/dump/iamarobot.mov"
                 else:
                     response = await generate_response(
                         'respond' if i == 0 else 'continue Rob\'s previous message',
@@ -55,7 +59,10 @@ async def on_message(message):
                     continue
 
                 history.append({"role": "assistant", "content": response})
-                await message.channel.send(response)
+                if should_reply and i == 0:
+                    await message.reply(response,  mention_author=False)
+                else:
+                    await message.channel.send(response)
 
                 # sleep between responses, not after the last one
                 if i < num_responses - 1:
