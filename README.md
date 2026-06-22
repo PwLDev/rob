@@ -26,9 +26,10 @@ Share opinions, laugh together, and level up your server with a bot that can tal
 ## Behavior overrides:
 - `#!owobonk` - Hits Rob with the magic owo stick that temporarily uwuifies his responses.
 ## Misc:
-- `#!help` - Lists all options that can be modified in your server.
+- `#!help` - Sends a link to Rob's official website.
 - `#!about` - Shows bot credits and interaction stats.
-- `#!dadjoke` - Sends a random joke from the [icanhazadadjoke](https://icanhazdadjoke.com/) API
+- `#!dadjoke` - Sends a random joke from the [icanhazadadjoke](https://icanhazdadjoke.com/) API.
+- `#!search` - Searches for stuff on the web using DuckDuckGo and provides a Rob-certified™ summary.
 
 # Development setup
 1. Install Obun
