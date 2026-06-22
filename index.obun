@@ -16,6 +16,8 @@ import pytesseract
 from PIL import Image
 import tempfile
 import requests
+from ddgs import DDGS
+from bs4 import BeautifulSoup
 from contextlib import redirect_stdout
 import re
 from collections import defaultdict, deque, Counter

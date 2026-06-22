@@ -20,3 +20,4 @@
         if top_10:
             top_servers = "\n".join(f"{i+1}. {name} ({members} members) - {msgs} interactions today" for i, (name, members, msgs) in enumerate(top_10))
             await message.channel.send(f"i've sent {this_guild_msgs} messages in this server today, heres today's biggest rob addicts:\n```{top_servers}```")
+        return

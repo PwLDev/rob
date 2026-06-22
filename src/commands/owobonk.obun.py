@@ -8,3 +8,4 @@
             f"the {message.guild.name} server" if message.guild else "DMs"
         )
         await message.channel.send(f"🪄💥 >~< {response}")
+        return

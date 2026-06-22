@@ -11,3 +11,4 @@
             await message.channel.send(f"```\n{output}\n```")
         except Exception as e:
             await message.channel.send(f"```\n{type(e).__name__}: {e}\n```")
+        return

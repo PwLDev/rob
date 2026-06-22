@@ -1,12 +1,10 @@
 @client.event
-async def on_message(message):
-    if message.author == client.user:
-        return # Ignore itself lol
-    
+async def on_message(message):    
     if message.guild:
         guild_id = message.guild.id
         config = load_config(guild_id)
-        guild_message_histories[guild_id].append({"role": "user", "content": process_msg(message)})
+        if config["listen"] and message.author != client.user:
+            guild_message_histories[guild_id].append({"role": "user", "content": process_msg(message)})
         history = guild_message_histories[guild_id]
         if not message.channel.permissions_for(message.guild.me).send_messages:
             return
@@ -14,8 +12,13 @@ async def on_message(message):
         user_id = message.author.id
         userconfig = "userland"
         config = load_config(userconfig)
-        dm_message_histories[user_id].append({"role": "user", "content": process_msg(message)})
+        if config["listen"] and message.author != client.user:
+            dm_message_histories[user_id].append({"role": "user", "content": process_msg(message)})
         history = dm_message_histories[user_id]
+
+    if message.author == client.user:
+        history.append({"role": "assistant", "content": message.content})
+        return # Ignore itself lol
     
     # --- BOT COMMANDS ---
     #:section src/commands/option.obun.py
@@ -28,6 +31,7 @@ async def on_message(message):
     #:section src/commands/phonebook.obun.py
     #:section src/commands/dadjoke.obun.py
     #:section src/commands/owobonk.obun.py
+    #:section src/commands/search.obun.py
     # ------------------
     
     if not config["listen"]:
@@ -38,7 +42,7 @@ async def on_message(message):
     
     if should_respond:
         async with message.channel.typing():
-            num_responses = random.choices([1, 2, 3], weights=[75, 20, 5], k=1)[0]
+            num_responses = random.choices([1, 2], weights=[85, 15], k=1)[0]
 
             for i in range(num_responses):
                 if random.random() < tin_can_chance:
@@ -47,6 +51,7 @@ async def on_message(message):
                     else:
                         response = "https://odysea.us.to/assets/dump/iamarobot.mov"
                 else:
+                    #print('response' if i == 0 else 'continuation')
                     response = await generate_response(
                         'respond' if i == 0 else 'continue Rob\'s previous message',
                         history,
@@ -58,11 +63,28 @@ async def on_message(message):
                 if (history and history[-1]["role"] == "assistant" and history[-1]["content"] == response):
                     continue
 
-                history.append({"role": "assistant", "content": response})
+                if "[searchfor: " in response:
+                    should_reply = False
+
                 if should_reply and i == 0:
                     await message.reply(response,  mention_author=False)
                 else:
-                    await message.channel.send(response)
+                    if "[searchfor: " in response:
+                        async def update_status(text):
+                            await message.channel.send(text)
+
+                        q = response[len("[searchfor:"): -1].strip()
+                        result = await websearch(q, update_status)
+                        response = await generate_response(
+                            f"Summarize the following text so that it's relevant to the conversation: '{result}'. Use the amount of words necessary to make a detailed explanation.",
+                            history,
+                            config.get("model"),
+                            config.get("dumb"),
+                            f"the {message.guild.name} server" if message.guild else "DMs"
+                        )
+                        await message.channel.send(response)
+                    else:
+                        await message.channel.send(response)
 
                 # sleep between responses, not after the last one
                 if i < num_responses - 1:

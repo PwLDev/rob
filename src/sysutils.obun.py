@@ -111,7 +111,7 @@ def process_msg(message):
 
             textcontent = ocr(attachment.url)
             if textcontent:
-                info.append(f'Has text which reads: "{textcontent[:500]}"')
+                info.append(f'Has text which reads: "{textcontent[:100]}"')
 
         parts.append(f"[Attachment: {', '.join(info)}]")
 
@@ -141,3 +141,102 @@ def process_msg(message):
 
     final_msg = " ".join(parts)
     return f"{message.author.name} {f'(in #{message.channel})' if message.guild else ''} said: {final_msg}"
+
+async def websearch(query: str, status_callback=None):
+    if status_callback:
+        await status_callback("alr lemme look that up for ya")
+    def search():
+        with DDGS() as ddgs:
+            return list(ddgs.text(query, max_results=2))
+
+    results = await asyncio.to_thread(search)
+
+    if not results:
+        return []
+
+    url = results[0]["href"]
+    if status_callback:
+        await status_callback(f"found smth on {url} lemme read it...")
+
+    try:
+        async with aiohttp.ClientSession(
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/126.0 Safari/537.36"
+                )
+            }
+        ) as session:
+            async with session.get(url, timeout=20) as response:
+                response.raise_for_status()
+                html = await response.text()
+    except aiohttp.ClientResponseError as e:
+        html = f"<p>HTTP error at webpage for '{query}': {e.status} {e.message}</p>"
+    except aiohttp.ClientConnectorError as e:
+        html = f"<p>Connection failed for webpage '{query}': {e}</p>"
+    except aiohttp.TimeoutError:
+        html = f"<p>Webpage for query '{query}' didn't respond in time.</p>"
+    except aiohttp.ClientError as e:
+        html = f"<p>Request error for webpage '{query}': {e}</p>"
+    except Exception as e:
+        html = f"<p>Unexpected browser error for query '{query}': {e}</p>"
+
+    def parse():
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup(["script", "style", "noscript"]):
+            tag.decompose()
+
+        root = soup.find("article") or soup
+
+        paragraphs = [
+            p.get_text(" ", strip=True)
+            for p in root.find_all("p")
+            if p.get_text(strip=True)
+        ]
+
+        text = "\n".join(paragraphs)
+        text = re.sub(r"\s+", " ", text).strip()
+
+        return text
+
+    text = await asyncio.to_thread(parse)
+
+    blocks = [
+        block.strip()
+        for block in re.split(r"\.\s+", text)
+        if block.strip()
+    ]
+
+    packages = [{"url": str(url)}]
+    seen = set()
+    query_words = []
+
+    for word in re.findall(r"\w+", query):
+        key = word.lower()
+        if key not in seen and len(key) > 2:
+            seen.add(key)
+            query_words.append(word)
+
+    for keyword in query_words:
+        keyword_lower = keyword.lower()
+
+        match_index = None
+        for i, block in enumerate(blocks):
+            if keyword_lower in block.lower():
+                match_index = i
+                break
+
+        packages.append({
+            "keyword": keyword,
+            "content": (
+                ". ".join(blocks[match_index:match_index + 4])
+                if match_index is not None
+                else ""
+            )
+        })
+
+    if status_callback:
+        await status_callback(f"alr so um")
+
+    return packages
