@@ -5,5 +5,5 @@ opencv-python
 numpy
 requests
 pytesseract
-readability-python
+bs4
 ddgs
