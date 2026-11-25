@@ -43,6 +43,7 @@ async def on_message(message):
     #:section src/commands/model.obun.py
     #:section src/commands/module.obun.py
     #:section src/commands/moderation.obun.py
+    #:section src/commands/uno.obun.py
     # ------------------
 
     if not config["listen"]:
